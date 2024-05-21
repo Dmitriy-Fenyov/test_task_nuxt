@@ -48,7 +48,6 @@ const fetchPosts = async () => {
 }
 fetchPosts();
 
-const router = useRouter();
 const isEditMode = ref(false);
 const postEdited = ref({});
 const toggleEdit = () => {

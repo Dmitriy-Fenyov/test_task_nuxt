@@ -1,21 +1,22 @@
 <template>
   <div class="item">
     <h2>Получение списка всех постов</h2>
+    <NuxtLink to="/posts/test">Test</NuxtLink>
     <div class="page-top">
       <template v-if="!isUserSelected">
         <el-button
-          v-if="curPage < 5"
+          v-if="$store.state.curPage < 5"
           class="button"
           type="primary"
-          @click="changePage(curPage + 1)"
+          @click="changePage($store.state.curPage + 1)"
         >
         Следующая страница
         </el-button>
         <el-button
-          v-if="curPage > 1"
+          v-if="$store.state.curPage > 1"
           class="button"
           type="primary"
-          @click="changePage(curPage - 1)"
+          @click="changePage($store.state.curPage - 1)"
         >
           Предыдущая страница
         </el-button>
@@ -59,7 +60,7 @@
 import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
 
 const posts = ref([]);
-const curPage= ref(1);
+
 const isLoading= ref(false);
 
 const changePage = async (page) => {
@@ -72,7 +73,7 @@ const changePage = async (page) => {
       }
     });
     posts.value = response
-    curPage.value = page;
+    $store.state.curPage = page;
   } catch {
   } finally {
     isLoading.value = false;
@@ -108,7 +109,7 @@ const filterUsers = async (userId) => {
     isLoading.value = true
     const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
     posts.value = response
-    curPage.value = 1;
+    $store.state.curPage = 1;
   } catch (error) {
   } finally {
     isLoading.value = false;
