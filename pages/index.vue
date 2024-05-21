@@ -8,7 +8,7 @@
           v-if="$store.state.curPage < 5"
           class="button"
           type="primary"
-          @click="changePage($store.state.curPage + 1)"
+          @click="$store.dispatch('changeNextPageVuex')"
         >
         Следующая страница
         </el-button>
@@ -16,7 +16,7 @@
           v-if="$store.state.curPage > 1"
           class="button"
           type="primary"
-          @click="changePage($store.state.curPage - 1)"
+          @click="$store.dispatch('changePrevPageVuex')"
         >
           Предыдущая страница
         </el-button>
@@ -44,7 +44,7 @@
       <div class="wrapper">
       <NuxtLink
         class="post"
-        v-for="post in posts"
+        v-for="post in $store.state.posts"
         :key="post.id"
         :to="`/posts/${post.id}`"
       >
@@ -59,11 +59,11 @@
 <script setup>
 import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
 
-const posts = ref([]);
+//const posts = ref([]);
 
 const isLoading= ref(false);
 
-const changePage = async (page) => {
+/*const changePage = async (page) => {
   try {
     isLoading.value = true;
     const response = await $fetch(`${API_BASE_URL}posts`, {
@@ -79,7 +79,7 @@ const changePage = async (page) => {
     isLoading.value = false;
   }
 }
-changePage(1);
+changePage(1);*/
 
 
 const options = ref([]);
@@ -109,7 +109,7 @@ const filterUsers = async (userId) => {
     isLoading.value = true
     const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
     posts.value = response
-    $store.state.curPage = 1;
+    curPage.value = 1;
   } catch (error) {
   } finally {
     isLoading.value = false;
