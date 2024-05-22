@@ -25,26 +25,26 @@
       <el-select
         class="select"
         placeholder="Select"
-        v-model="options.id"
+        v-model="$store.state.options.id"
         size="large"
         :clearable="true"
         @change="handleFilter"
       >
         <el-option
-          v-for="item in options"
+          v-for="item in $store.state.options"
           :key="item.value"
           :label="item.username"
           :value="item.id"
         />
       </el-select>
     </div>
-      <div class="wrapper" v-if="isLoading === true">
+      <div class="wrapper" v-if="$store.state.isLoading === true">
         <el-skeleton class="post" v-for="el in POSTS_PER_PAGE" :key="el"/>
       </div>
       <div class="wrapper">
       <NuxtLink
         class="post"
-        v-for="post in $store.state.posts"
+        v-for="post in $store.state.curPots"
         :key="post.id"
         :to="`/posts/${post.id}`"
       >
@@ -57,11 +57,16 @@
 </template>
 
 <script setup>
+import { useStore } from 'vuex';
 import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
+const store = useStore();
+store.dispatch('fetchPosts');
+store.dispatch('fetchUsers');
 
-//const posts = ref([]);
+//store.commit('post');
 
-const isLoading= ref(false);
+
+
 
 /*const changePage = async (page) => {
   try {
@@ -82,39 +87,22 @@ const isLoading= ref(false);
 changePage(1);*/
 
 
-const options = ref([]);
-const fetchUsers = async () => {
-  try {
-    const response = await $fetch(`${API_BASE_URL}users`)
-    options.value = response.map(({ username, id }) => ({ username, id }));
-  } catch (e) {
-    alert('Erorr')
-  }
-};
-fetchUsers();
 
 
-const isUserSelected = ref(false);
-const handleFilter = (userId) => {
-  if (userId) {
-    isUserSelected.value = true;
-    filterUsers(userId);
-    return
-  }
-  isUserSelected.value = false;
-  changePage(1);
-}
-const filterUsers = async (userId) => {
+
+
+
+
+/*const filterUsers = async (userId) => {
   try {
     isLoading.value = true
     const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
     posts.value = response
-    curPage.value = 1;
   } catch (error) {
   } finally {
     isLoading.value = false;
   }
-}
+}*/
 </script>
 
 <style scoped>
