@@ -25,31 +25,30 @@
 </template>
 
 <script setup>
-import { API_BASE_URL } from '/helpers/constants.js';
+import { useStore } from 'vuex';
+import { API_BASE_URL} from '/helpers/constants.js';
 
 const route = useRoute()
-const isLoading= ref(false);
+const store = useStore();
+
+const desiredId = route.params.id;
+
 const post = ref({
   id: null,
   title: '',
   body: '',
 });
-const fetchPosts = async () => {
-  try {
-    isLoading.value = true
-    const response = await $fetch(`${API_BASE_URL}posts/` + route.params.id)
-    post.value = response
-    console.log(post.value)
-  } catch (e) {
-    alert('Erorr')
-  } finally {
-    isLoading.value= false
+
+for (let i = 0; i < store.state.posts.length-1; i++) {
+  if (store.state.posts[i].id == desiredId) {
+    post.value = store.state.posts[i];
+      break; // Найден нужный пользователь, выходим из цикла
   }
 }
-fetchPosts();
 
 const isEditMode = ref(false);
 const postEdited = ref({});
+
 const toggleEdit = () => {
   isEditMode.value = !isEditMode.value;
   if (isEditMode.value) {
@@ -68,6 +67,7 @@ const updatePost = async () => {
     navigateTo('/');
   } catch (error) {}
 }
+
 </script>
 
 <style scoped>

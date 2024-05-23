@@ -7,7 +7,7 @@ const store = createStore({
         return {
         posts: [],
         options: [],
-        curPots: [],
+        curPosts: [],
         curPage: 1,
         limit: 20,
         isLoading: false,
@@ -16,25 +16,23 @@ const store = createStore({
     },
     mutations: {
         post(state) {
-            state.curPots = state.posts.slice(0, state.limit);
+            state.curPosts = state.posts.slice(0, state.limit);
         },
     },
     actions: {
-        async fetchPosts({ state, context, commit }) {
+        async fetchPosts({ state }) {
             state.isLoading = true;
             try {
             const response = await $fetch(`${API_BASE_URL}posts`);
             state.posts = response;
-
             store.commit('post');
-            console.log('changePageVuex log 3- выполнено')
             } catch {
                 console.log('fetchPosts error')
             }  finally {
                 state.isLoading = false;
             }
         },
-        async fetchUsers({ state, context }) {
+        async fetchUsers({ state}) {
             try {
                 const response = await $fetch(`${API_BASE_URL}users`)
                 state.options = response.map(({ username, id }) => ({ username, id }));
@@ -42,18 +40,24 @@ const store = createStore({
                 alert('Erorr')
             }
         },
-        changeNextPageVuex({ state, context }) {
+        filterUsers({ state},userId) {
+            state.isLoading = true
+            state.curPosts = state.posts.filter(post => post.userId === userId)
+            state.curPage = 1;
+            state.isLoading = false;
+        },
+        changeNextPageVuex({ state }) {
             const curlim = state.curPage * state.limit
             state.curPage++
             state.isLoading = true;
-            state.curPots = state.posts.slice(curlim, state.curPage*state.limit);
+            state.curPosts = state.posts.slice(curlim, state.curPage*state.limit);
             state.isLoading = false;
         },
-        changePrevPageVuex({ state, context }) {
+        changePrevPageVuex({ state }) {
             state.curPage--
             const curlim = state.curPage * state.limit-state.limit
             state.isLoading = true;
-            state.curPots = state.posts.slice(curlim, state.curPage*state.limit );
+            state.curPosts = state.posts.slice(curlim, state.curPage*state.limit );
             state.isLoading = false;
         },
     }

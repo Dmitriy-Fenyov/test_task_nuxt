@@ -1,7 +1,6 @@
 <template>
   <div class="item">
     <h2>Получение списка всех постов</h2>
-    <NuxtLink to="/posts/test">Test</NuxtLink>
     <div class="page-top">
       <template v-if="!isUserSelected">
         <el-button
@@ -44,7 +43,7 @@
       <div class="wrapper">
       <NuxtLink
         class="post"
-        v-for="post in $store.state.curPots"
+        v-for="post in $store.state.curPosts"
         :key="post.id"
         :to="`/posts/${post.id}`"
       >
@@ -63,46 +62,21 @@ const store = useStore();
 store.dispatch('fetchPosts');
 store.dispatch('fetchUsers');
 
-//store.commit('post');
 
+const isUserSelected = ref(false);
 
-
-
-/*const changePage = async (page) => {
-  try {
-    isLoading.value = true;
-    const response = await $fetch(`${API_BASE_URL}posts`, {
-      params: {
-        _page: page,
-        _limit: POSTS_PER_PAGE,
-      }
-    });
-    posts.value = response
-    $store.state.curPage = page;
-  } catch {
-  } finally {
-    isLoading.value = false;
+const handleFilter = (userId) => {
+  if (userId) {
+    isUserSelected.value = true;
+    store.dispatch('filterUsers', userId);
+    return
   }
+  isUserSelected.value = false;
+  store.commit('post');
 }
-changePage(1);*/
 
 
 
-
-
-
-
-
-/*const filterUsers = async (userId) => {
-  try {
-    isLoading.value = true
-    const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
-    posts.value = response
-  } catch (error) {
-  } finally {
-    isLoading.value = false;
-  }
-}*/
 </script>
 
 <style scoped>
