@@ -57,7 +57,7 @@
 
 <script setup>
 import { useStore } from 'vuex';
-import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
+import { POSTS_PER_PAGE } from '/helpers/constants.js';
 const store = useStore();
 store.dispatch('fetchPosts');
 store.dispatch('fetchUsers');
@@ -68,14 +68,12 @@ const isUserSelected = ref(false);
 const handleFilter = (userId) => {
   if (userId) {
     isUserSelected.value = true;
-    store.dispatch('filterUsers', userId);
+    store.commit('filterUsers', userId);
     return
   }
   isUserSelected.value = false;
-  store.commit('post');
+  store.commit('posts');
 }
-
-
 
 </script>
 

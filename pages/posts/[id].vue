@@ -39,10 +39,12 @@ const post = ref({
   body: '',
 });
 
+store.commit('post',desiredId);
+
 for (let i = 0; i < store.state.posts.length-1; i++) {
   if (store.state.posts[i].id == desiredId) {
     post.value = store.state.posts[i];
-      break; // Найден нужный пользователь, выходим из цикла
+      break;
   }
 }
 

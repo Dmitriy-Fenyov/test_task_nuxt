@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
+import { API_BASE_URL } from '/helpers/constants.js';
 
 
 const store = createStore({
@@ -15,8 +15,14 @@ const store = createStore({
         };
     },
     mutations: {
-        post(state) {
+        posts(state) {
             state.curPosts = state.posts.slice(0, state.limit);
+        },
+        filterUsers(state,userId) {
+            state.isLoading = true
+            state.curPosts = state.posts.filter(post => post.userId === userId)
+            state.curPage = 1;
+            state.isLoading = false;
         },
     },
     actions: {
@@ -25,7 +31,7 @@ const store = createStore({
             try {
             const response = await $fetch(`${API_BASE_URL}posts`);
             state.posts = response;
-            store.commit('post');
+            store.commit('posts');
             } catch {
                 console.log('fetchPosts error')
             }  finally {
@@ -39,12 +45,6 @@ const store = createStore({
             } catch (e) {
                 alert('Erorr')
             }
-        },
-        filterUsers({ state},userId) {
-            state.isLoading = true
-            state.curPosts = state.posts.filter(post => post.userId === userId)
-            state.curPage = 1;
-            state.isLoading = false;
         },
         changeNextPageVuex({ state }) {
             const curlim = state.curPage * state.limit
