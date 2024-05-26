@@ -18,8 +18,13 @@ const store = createStore({
         postEdited: {},
         };
     },
+    mutation: {
+        changePage (state, response) {
+            state.posts = response;
+        }
+    },
     actions: {
-        async changePage({ state }, page) {
+        async changePage({ state,commit }, page) {
             state.isLoading = true;
             try {
                 const response = await $fetch(`${API_BASE_URL}posts`, {
@@ -28,7 +33,7 @@ const store = createStore({
                         _limit: POSTS_PER_PAGE,
                     }
                 });
-                state.posts = response
+                state.posts = response;
                 state.curPage = page;
             } catch {
                 console.log('changePage error')
@@ -47,8 +52,8 @@ const store = createStore({
         async filterUsers({ state}, userId) {
             try {
                 state.isLoading = true;
-                const responsed = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
-                state.posts = responsed
+                const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
+                state.posts = response
                 state.curPage = 1;
             } catch (error) {
                 console.log('filterUsers error')
@@ -63,7 +68,7 @@ const store = createStore({
                 state.post = response
                 state.curPage = 1;
             } catch (error) {
-                console.log('filterUsers error')
+                console.log('fetchPost error')
             } finally {
                 state.isLoading = false;
             }
