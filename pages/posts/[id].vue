@@ -1,52 +1,39 @@
 <template>
   <div class="post">
     <h2 class="post__title"> Детальная страница поста № {{ route.params.id }}</h2>
-    <el-skeleton v-if="isLoading === true" />
+    <el-skeleton v-if="$store.state.isLoading === true" />
+    <template v-else>
+      <div class="post__postTitle"><strong>{{ $store.state.post.title }}</strong></div>
+      <div class="post__postBody">{{ $store.state.post.body }}</div>
+      <div class="flexWrapper">
+        <div>user id: {{ $store.state.post.userId }}</div>
+        <div>post id: {{ $store.state.post.id }}</div>
+      </div>  
+      <NuxtLink class="post__link" to='/'> Вернуться назад</NuxtLink>
 
-    <div class="post__postTitle"><strong>{{ post.title }}</strong></div>
-    <div class="post__postBody">{{ post.body }}</div>
-    <div class="flexWrapper">
-      <div>user id: {{ post.userId }}</div>
-      <div>post id: {{ post.id }}</div>
-    </div>  
-    <NuxtLink class="post__link" to='/'> Вернуться назад</NuxtLink>
-
-    <el-button type="primary" @click="toggleEdit">
-      Редактировать
-    </el-button>
-    <div v-if="isEditMode" class="post__form">
-      <el-input v-model="postEdited.title"/>
-      <el-input v-model="postEdited.body"/>
-      <el-button class="post__button" type="success" @click="updatePost">
-        Сохранить изменения
+      <el-button type="primary" @click="toggleEdit">
+        Редактировать
       </el-button>
-    </div>
+      <div v-if="isEditMode" class="post__form">
+        <el-input v-model="postEdited.title"/>
+        <el-input v-model="postEdited.body"/>
+        <el-button class="post__button" type="success" @click="updatePost">
+          Сохранить изменения
+        </el-button>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup>
 import { useStore } from 'vuex';
 import { API_BASE_URL} from '/helpers/constants.js';
-
-const route = useRoute()
 const store = useStore();
 
-const desiredId = route.params.id;
+const route = useRoute()
+const postNum = route.params.id
 
-const post = ref({
-  id: null,
-  title: '',
-  body: '',
-});
-
-store.commit('post',desiredId);
-
-for (let i = 0; i < store.state.posts.length-1; i++) {
-  if (store.state.posts[i].id == desiredId) {
-    post.value = store.state.posts[i];
-      break;
-  }
-}
+store.dispatch('fetchPost', postNum);
 
 const isEditMode = ref(false);
 const postEdited = ref({});
@@ -54,12 +41,12 @@ const postEdited = ref({});
 const toggleEdit = () => {
   isEditMode.value = !isEditMode.value;
   if (isEditMode.value) {
-    postEdited.value = { ...post.value }
+    postEdited.value = { ...store.state.post }
   }
 }
 const updatePost = async () => {
   try {
-    await $fetch(`${API_BASE_URL}posts/${post.value.id}`, {
+    await $fetch(`${API_BASE_URL}posts/${postNum}`, {
       method: 'PATCH',
       body: {
         title: postEdited.value.title,

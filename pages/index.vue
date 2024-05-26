@@ -7,7 +7,7 @@
           v-if="$store.state.curPage < 5"
           class="button"
           type="primary"
-          @click="$store.dispatch('changeNextPageVuex')"
+          @click="$store.dispatch('changePage', $store.state.curPage + 1)"
         >
         Следующая страница
         </el-button>
@@ -15,7 +15,7 @@
           v-if="$store.state.curPage > 1"
           class="button"
           type="primary"
-          @click="$store.dispatch('changePrevPageVuex')"
+          @click="$store.dispatch('changePage',$store.state.curPage - 1)"
         >
           Предыдущая страница
         </el-button>
@@ -33,7 +33,7 @@
           v-for="item in $store.state.options"
           :key="item.value"
           :label="item.username"
-          :value="item.id"
+          :value="item.id" 
         />
       </el-select>
     </div>
@@ -43,7 +43,7 @@
       <div class="wrapper">
       <NuxtLink
         class="post"
-        v-for="post in $store.state.curPosts"
+        v-for="post in $store.state.posts"
         :key="post.id"
         :to="`/posts/${post.id}`"
       >
@@ -59,22 +59,20 @@
 import { useStore } from 'vuex';
 import { POSTS_PER_PAGE } from '/helpers/constants.js';
 const store = useStore();
-store.dispatch('fetchPosts');
+
+store.dispatch('changePage', 1);
 store.dispatch('fetchUsers');
 
-
 const isUserSelected = ref(false);
-
 const handleFilter = (userId) => {
   if (userId) {
     isUserSelected.value = true;
-    store.commit('filterUsers', userId);
+    store.dispatch('filterUsers', userId);
     return
   }
   isUserSelected.value = false;
-  store.commit('posts');
+  store.dispatch('changePage', 1);
 }
-
 </script>
 
 <style scoped>

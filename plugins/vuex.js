@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { API_BASE_URL } from '/helpers/constants.js';
+import { API_BASE_URL, POSTS_PER_PAGE } from '/helpers/constants.js';
 
 
 const store = createStore({
@@ -7,38 +7,36 @@ const store = createStore({
         return {
         posts: [],
         options: [],
-        curPosts: [],
         curPage: 1,
-        limit: 20,
         isLoading: false,
-        isUserSelected:false,
+        post:{
+            id: null,
+            title: '',
+            body: '',
+        },
+        isEditMode: false,
+        postEdited: {},
         };
     },
-    mutations: {
-        posts(state) {
-            state.curPosts = state.posts.slice(0, state.limit);
-        },
-        filterUsers(state,userId) {
-            state.isLoading = true
-            state.curPosts = state.posts.filter(post => post.userId === userId)
-            state.curPage = 1;
-            state.isLoading = false;
-        },
-    },
     actions: {
-        async fetchPosts({ state }) {
+        async changePage({ state }, page) {
             state.isLoading = true;
             try {
-            const response = await $fetch(`${API_BASE_URL}posts`);
-            state.posts = response;
-            store.commit('posts');
+                const response = await $fetch(`${API_BASE_URL}posts`, {
+                    params: {
+                        _page: page,
+                        _limit: POSTS_PER_PAGE,
+                    }
+                });
+                state.posts = response
+                state.curPage = page;
             } catch {
-                console.log('fetchPosts error')
+                console.log('changePage error')
             }  finally {
                 state.isLoading = false;
             }
         },
-        async fetchUsers({ state}) {
+        async fetchUsers({state}) {
             try {
                 const response = await $fetch(`${API_BASE_URL}users`)
                 state.options = response.map(({ username, id }) => ({ username, id }));
@@ -46,19 +44,29 @@ const store = createStore({
                 alert('Erorr')
             }
         },
-        changeNextPageVuex({ state }) {
-            const curlim = state.curPage * state.limit
-            state.curPage++
-            state.isLoading = true;
-            state.curPosts = state.posts.slice(curlim, state.curPage*state.limit);
-            state.isLoading = false;
+        async filterUsers({ state}, userId) {
+            try {
+                state.isLoading = true;
+                const responsed = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
+                state.posts = responsed
+                state.curPage = 1;
+            } catch (error) {
+                console.log('filterUsers error')
+            } finally {
+                state.isLoading = false;
+            }
         },
-        changePrevPageVuex({ state }) {
-            state.curPage--
-            const curlim = state.curPage * state.limit-state.limit
-            state.isLoading = true;
-            state.curPosts = state.posts.slice(curlim, state.curPage*state.limit );
-            state.isLoading = false;
+        async fetchPost({ state}, postNum) {
+            try {
+                state.isLoading = true;
+                const response = await $fetch(`${API_BASE_URL}posts/` + postNum)
+                state.post = response
+                state.curPage = 1;
+            } catch (error) {
+                console.log('filterUsers error')
+            } finally {
+                state.isLoading = false;
+            }
         },
     }
 });
