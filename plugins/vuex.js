@@ -9,6 +9,7 @@ const store = createStore({
         options: [],
         curPage: 1,
         isLoading: false,
+        isUserSelected: false,
         post:{
             id: null,
             title: '',
@@ -18,14 +19,35 @@ const store = createStore({
         postEdited: {},
         };
     },
-    mutation: {
+    mutations: {
         changePage (state, response) {
             state.posts = response;
-        }
+        },
+        toggleIsLoading(state) {
+            state.isLoading =!state.isLoading;
+        },
+        toggleIsUserSelected(state) {
+            state.isUserSelected =!state.isUserSelected
+        },
+        curPage(state, page){
+            state.curPage = page;
+        },
+        changePost (state, response) {
+            state.post = response;
+        },
+        changeOptions (state, response) {
+            state.options = response.map(({ username, id }) => ({ username, id }));
+        },
+        toggleEdit (state) {
+            state.isEditMode = !state.isEditMode;
+        },
+        postEdited (state) {
+            state.postEdited = { ...state.post }
+        },
     },
     actions: {
-        async changePage({ state,commit }, page) {
-            state.isLoading = true;
+        async changePage({ commit }, page) {
+            commit('toggleIsLoading')
             try {
                 const response = await $fetch(`${API_BASE_URL}posts`, {
                     params: {
@@ -33,45 +55,82 @@ const store = createStore({
                         _limit: POSTS_PER_PAGE,
                     }
                 });
-                state.posts = response;
-                state.curPage = page;
+                commit('changePage',response)
+                commit('curPage', page)
             } catch {
                 console.log('changePage error')
             }  finally {
-                state.isLoading = false;
+                commit('toggleIsLoading')
             }
         },
-        async fetchUsers({state}) {
+        async fetchUsers({commit}) {
             try {
                 const response = await $fetch(`${API_BASE_URL}users`)
-                state.options = response.map(({ username, id }) => ({ username, id }));
+                commit('changeOptions',response)
             } catch (e) {
                 alert('Erorr')
             }
         },
-        async filterUsers({ state}, userId) {
+        async filterUsers({ commit }, userId) {
             try {
-                state.isLoading = true;
+                commit('toggleIsLoading')
                 const response = await $fetch(`${API_BASE_URL}posts?userId=${userId}`);
-                state.posts = response
-                state.curPage = 1;
+                commit('changePage',response)
+                commit('curPage', 1)
             } catch (error) {
                 console.log('filterUsers error')
             } finally {
-                state.isLoading = false;
+                commit('toggleIsLoading')
             }
         },
-        async fetchPost({ state}, postNum) {
+        async fetchPost({ state, commit }, postNum) {
             try {
-                state.isLoading = true;
+                if(state.isEditMode) {
+                    commit('toggleEdit')
+                }
+                commit('toggleIsLoading')
                 const response = await $fetch(`${API_BASE_URL}posts/` + postNum)
-                state.post = response
-                state.curPage = 1;
+                commit('changePost',response)
+                commit('curPage', 1)
             } catch (error) {
                 console.log('fetchPost error')
             } finally {
-                state.isLoading = false;
+                commit('toggleIsLoading')
+                commit('postEdited')
+                if(state.isUserSelected) {
+                    commit('toggleIsUserSelected')
+                }
             }
+        },
+        async updatePost({ state, commit }, postNum) {
+            try {
+                await $fetch(`${API_BASE_URL}posts/${postNum}`, {
+                    method: 'PATCH',
+                    body: {
+                        title: state.postEdited.title,
+                        body: state.postEdited.body,
+                    }
+                })
+                commit('postEdited')
+                navigateTo('/');
+                commit('toggleEdit')
+                } catch (error) {
+                    console.log('updatePost error')
+                }
+        },
+        handleFilter({ state,commit, dispatch }, userId) {
+            if (userId) {
+                if(!state.isUserSelected) {
+                    commit('toggleIsUserSelected')
+                }
+                dispatch('filterUsers', userId);
+                return
+            }
+            commit('toggleIsUserSelected')
+            dispatch('changePage', 1);
+        },
+        toggleEdit({ commit }) {
+            commit('toggleEdit')
         },
     }
 });

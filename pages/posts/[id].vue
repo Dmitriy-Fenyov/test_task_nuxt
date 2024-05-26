@@ -11,13 +11,13 @@
       </div>  
       <NuxtLink class="post__link" to='/'> Вернуться назад</NuxtLink>
 
-      <el-button type="primary" @click="toggleEdit">
+      <el-button type="primary" @click="$store.dispatch('toggleEdit')">
         Редактировать
       </el-button>
-      <div v-if="isEditMode" class="post__form">
-        <el-input v-model="postEdited.title"/>
-        <el-input v-model="postEdited.body"/>
-        <el-button class="post__button" type="success" @click="updatePost">
+      <div v-if="$store.state.isEditMode" class="post__form">
+        <el-input v-model="$store.state.postEdited.title"/>
+        <el-input v-model="$store.state.postEdited.body"/>
+        <el-button class="post__button" type="success" @click="$store.dispatch('updatePost', postNum)">
           Сохранить изменения
         </el-button>
       </div>
@@ -27,35 +27,13 @@
 
 <script setup>
 import { useStore } from 'vuex';
-import { API_BASE_URL} from '/helpers/constants.js';
+
 const store = useStore();
 
 const route = useRoute()
 const postNum = route.params.id
 
 store.dispatch('fetchPost', postNum);
-
-const isEditMode = ref(false);
-const postEdited = ref({});
-
-const toggleEdit = () => {
-  isEditMode.value = !isEditMode.value;
-  if (isEditMode.value) {
-    postEdited.value = { ...store.state.post }
-  }
-}
-const updatePost = async () => {
-  try {
-    await $fetch(`${API_BASE_URL}posts/${postNum}`, {
-      method: 'PATCH',
-      body: {
-        title: postEdited.value.title,
-        body: postEdited.value.body,
-      }
-    })
-    navigateTo('/');
-  } catch (error) {}
-}
 
 </script>
 

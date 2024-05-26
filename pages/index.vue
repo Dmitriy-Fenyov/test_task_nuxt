@@ -2,7 +2,7 @@
   <div class="item">
     <h2>Получение списка всех постов</h2>
     <div class="page-top">
-      <template v-if="!isUserSelected">
+      <template v-if="!$store.state.isUserSelected">
         <el-button
           v-if="$store.state.curPage < 5"
           class="button"
@@ -27,7 +27,7 @@
         v-model="$store.state.options.id"
         size="large"
         :clearable="true"
-        @change="handleFilter"
+        @change="$store.dispatch('handleFilter',$store.state.options.id)"
       >
         <el-option
           v-for="item in $store.state.options"
@@ -63,16 +63,6 @@ const store = useStore();
 store.dispatch('changePage', 1);
 store.dispatch('fetchUsers');
 
-const isUserSelected = ref(false);
-const handleFilter = (userId) => {
-  if (userId) {
-    isUserSelected.value = true;
-    store.dispatch('filterUsers', userId);
-    return
-  }
-  isUserSelected.value = false;
-  store.dispatch('changePage', 1);
-}
 </script>
 
 <style scoped>
